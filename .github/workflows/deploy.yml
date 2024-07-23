@@ -1,13 +1,44 @@
-name: Deploy to Kubernetes
+name: Build and Deploy
 
 on:
   push:
     branches:
       - main
+  create:
+    tags:
+      - 'v*.*.*'
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ evolgina }}
+          password: ${{ Lenchik13@ }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: |
+            your-docker-username/app:latest
+            your-docker-username/app:${{ github.sha }}
+            ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'your-docker-username/app:main' || '' }}
+            ${{ github.event_name == 'create' && startsWith(github.ref, 'refs/tags/v') && format('your-docker-username/app:{0}', github.ref_name) || '' }}
+
   deploy:
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
       - name: Checkout repository
@@ -18,24 +49,9 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Set up Helm
-        uses: azure/setup-helm@v1
-        with:
-          version: 'latest'
-
-      - name: Add Helm repository
-        run: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-
-      - name: Update Helm repositories
-        run: helm repo update
-
-      - name: Install kube-prometheus-stack
-        run: helm install kube-prometheus prometheus-community/kube-prometheus-stack -f promn.yaml
-
-      - name: Deploy nginx
-        run: kubectl apply -f deployment.yaml
-
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/nginx nginx=your-docker-username/app:latest -n default
     env:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
-      KUBERNETES_SERVER: ${{ secrets.KUBERNETES_SERVER }}
-      KUBERNETES_SERVICE_ACCOUNT_TOKEN: ${{ secrets.KUBERNETES_SERVICE_ACCOUNT_TOKEN }}
+
