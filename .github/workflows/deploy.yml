@@ -57,7 +57,7 @@ jobs:
           echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
           export KUBECONFIG=kubeconfig.yaml
           kubectl config view
-          
+
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/nginx nginx=${{ secrets.DOCKER_USERNAME }}/app:latest -n default
