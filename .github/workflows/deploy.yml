@@ -15,19 +15,19 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3  # Обновлено на v3
+        uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2  # Обновлено на v2
+        uses: docker/setup-buildx-action@v2
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2  # Обновлено на v2
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v3  # Обновлено на v3
+        uses: docker/build-push-action@v3
         with:
           context: .
           push: true
@@ -43,16 +43,25 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3  # Обновлено на v3
+        uses: actions/checkout@v3
 
-      - name: Set up Kubernetes
-        uses: azure/setup-kubectl@v1  # Обновлено на v1
-        with:
-          version: 'latest'
+      - name: Set up kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+          kubectl version --client
 
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+          export KUBECONFIG=kubeconfig.yaml
+          kubectl config view
+          
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/nginx nginx=${{ secrets.DOCKER_USERNAME }}/app:latest -n default
     env:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      KUBERNETES_SERVER: ${{ secrets.KUBERNETES_SERVER }}
       KUBERNETES_SERVICE_ACCOUNT_TOKEN: ${{ secrets.KUBERNETES_SERVICE_ACCOUNT_TOKEN }}
