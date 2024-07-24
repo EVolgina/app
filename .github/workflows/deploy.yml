@@ -22,8 +22,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
-          username: ${{ evolgina }}
-          password: ${{ Lenchik13@ }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
@@ -31,10 +31,10 @@ jobs:
           context: .
           push: true
           tags: |
-            your-docker-username/app:latest
-            your-docker-username/app:${{ github.sha }}
-            ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'your-docker-username/app:main' || '' }}
-            ${{ github.event_name == 'create' && startsWith(github.ref, 'refs/tags/v') && format('your-docker-username/app:{0}', github.ref_name) || '' }}
+            ${{ secrets.DOCKER_USERNAME }}/app:latest
+            ${{ secrets.DOCKER_USERNAME }}/app:${{ github.sha }}
+            ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && format('{0}/app:main', secrets.DOCKER_USERNAME) || '' }}
+            ${{ github.event_name == 'create' && startsWith(github.ref, 'refs/tags/v') && format('{0}/app:{1}', secrets.DOCKER_USERNAME, github.ref_name) || '' }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl set image deployment/nginx nginx=your-docker-username/app:latest -n default
+          kubectl set image deployment/nginx nginx=${{ secrets.DOCKER_USERNAME }}/app:latest -n default
     env:
       KUBECONFIG: ${{ secrets.KUBECONFIG }}
-
+      KUBERNETES_SERVICE_ACCOUNT_TOKEN: ${{ secrets.KUBERNETES_SERVICE_ACCOUNT_TOKEN }}
