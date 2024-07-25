@@ -1,0 +1,42 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Срабатывает на теги вида v1.0.0
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Yandex Cloud CLI
+      run: |
+        curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+        echo 'PATH=$PATH:/home/runner/.yandex-cloud/bin' >> $GITHUB_ENV
+        source $GITHUB_ENV
+        yc config set token ${{ secrets.YC_TOKEN }}
+        yc config set cloud-id ${{ secrets.YC_CLOUD_ID }}
+        yc config set folder-id ${{ secrets.YC_FOLDER_ID }}
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v1
+      with:
+        version: '1.26.0'
+
+    - name: Set up kubeconfig
+      run: |
+        echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+        export KUBECONFIG=kubeconfig.yaml
+        kubectl config view
+
+    - name: Deploy to Kubernetes
+      run: |
+        IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/my-image-name:${{ github.ref }}
+        kubectl set image deployment/my-deployment my-app=$IMAGE_TAG
+        kubectl rollout status deployment/my-deployment
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG }}
