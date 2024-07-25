@@ -48,11 +48,11 @@ jobs:
         run: |
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
           echo 'PATH=$PATH:/home/runner/.yandex-cloud/bin' >> $GITHUB_ENV
-      - name: Install kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
+       - name: Install kubectl
+        uses: docker://bitnami/kubectl:latest
+        with:
+          entrypoint: "/bin/sh"
+          args: -c "kubectl version --client"
 
       - name: Configure kubectl
         run: |
