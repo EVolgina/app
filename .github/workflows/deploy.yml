@@ -45,30 +45,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Yandex.Cloud CLI
-        run: |
-          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-          echo "/home/runner/.yandex-cloud/bin" >> $GITHUB_PATH
-          echo 'source /home/runner/.bashrc' >> $GITHUB_ENV
-          yc --version
-
-      - name: Configure Yandex.Cloud CLI
-        run: |
-          /home/runner/.yandex-cloud/bin/yc config set token ${{ secrets.YC_TOKEN }}
-          /home/runner/.yandex-cloud/bin/yc config set cloud-id ${{ secrets.YC_CLOUD_ID }}
-          /home/runner/.yandex-cloud/bin/yc config set folder-id ${{ secrets.YC_FOLDER_ID }}
-
-      - name: Set up kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
-          kubectl version --client
-
       - name: Configure kubectl
         run: |
           echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
           export KUBECONFIG=kubeconfig.yaml
+          kubectl version --client
           kubectl config view
           kubectl get pods --all-namespaces
 
