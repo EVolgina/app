@@ -42,8 +42,8 @@ jobs:
       - name: Install Yandex Cloud CLI
         run: |
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-          echo 'PATH=$PATH:/home/runner/.yandex-cloud/bin' >> $GITHUB_ENV
-          echo 'PATH=$PATH:/home/runner/.yandex-cloud/bin' >> ~/.bashrc
+          echo 'export PATH=$PATH:/home/runner/.yandex-cloud/bin' >> $GITHUB_ENV
+          echo 'export PATH=$PATH:/home/runner/.yandex-cloud/bin' >> ~/.bashrc
           source ~/.bashrc
           yc --version
       - name: Log in to Docker Hub
