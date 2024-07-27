@@ -37,8 +37,8 @@ jobs:
       - name: Set up Yandex Cloud CLI
         run: |
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-          echo 'export PATH=$PATH:/home/runner/.yandex-cloud/bin' >> $GITHUB_ENV
-          export PATH=$PATH:/home/runner/.yandex-cloud/bin
+          echo 'PATH=$PATH:/home/runner/.yandex-cloud/bin' >> $GITHUB_ENV
+          source /home/runner/.bashrc
           yc --version
          
       - name: Set up kubeconfig
