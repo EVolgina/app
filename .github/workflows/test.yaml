@@ -46,17 +46,14 @@ jobs:
           source $GITHUB_ENV
           which yc
           yc --version
-      - name: Use Yandex Cloud CLI
-        run: |
-          source $GITHUB_ENV
-          yc --help
-    
+
       - name: Set up kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
           kubectl version --client
+
       - name: Configure kubectl
         run: |
           source $GITHUB_ENV
@@ -64,6 +61,9 @@ jobs:
           export KUBECONFIG=kubeconfig.yaml
           kubectl config view
           kubectl get pods --all-namespaces
+      - name: Configure Kubernetes
+        run: |
+         yc managed-kubernetes cluster get-credentials k8s-regional --external    
       - name: Deploy to Kubernetes
         run: |
           source $GITHUB_ENV
