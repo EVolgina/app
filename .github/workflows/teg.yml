@@ -17,32 +17,34 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1  
 
-     - name: Build and Push Docker Image with Tag
+      - name: Build and Push Docker Image with Tag
         uses: docker/build-push-action@v2
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: cr.yandex/${{ secrets.YC_CLOUDE_ID }}/${{ secrets.YC_FOLDER_ID }}:${{ github.ref_name }}   
+          tags: cr.yandex/${{ secrets.YC_CLOUD_ID }}/${{ secrets.YC_FOLDER_ID }}:${{ github.ref_name }}
 
       - name: Set up Yandex Cloud CLI
         run: |
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
           echo 'PATH=$PATH:/home/runner/.yandex-cloud/bin' >> $GITHUB_ENV
           source $GITHUB_ENV
+      - name: Configure Yandex Cloud CLI
+        run: |
           yc config set token ${{ secrets.YC_TOKEN }}
           yc config set cloud-id ${{ secrets.YC_CLOUD_ID }}
           yc config set folder-id ${{ secrets.YC_FOLDER_ID }}
 
       - name: Set up kubeconfig
         run: |
-          echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig.yaml
           export KUBECONFIG=kubeconfig.yaml
           kubectl config view
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl set image deployment/my-deployment my-container=${{ secrets.DOCKER_USERNAME }}/my-image-name:${{ github.ref }}
+          kubectl set image deployment/my-deployment my-container=cr.yandex/${{ secrets.YC_CLOUD_ID }}/${{ secrets.YC_FOLDER_ID }}:${{ github.ref_name }}
           kubectl rollout status deployment/my-deployment
         env:
           KUBECONFIG: ${{ secrets.KUBECONFIG }}
