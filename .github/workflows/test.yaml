@@ -55,10 +55,11 @@ jobs:
           kubectl version --client
       - name: Configure kubectl
         run: |
+          export PATH=$PATH:/home/runner/.yandex-cloud/bin
           echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
           export KUBECONFIG=kubeconfig.yaml
           kubectl config view
-          kubectl get pods --all-namespaces # Для проверки подключения
+          kubectl get pods --all-namespaces
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/nginx nginx=${{ secrets.DOCKER_USERNAME }}/app:latest -n default
