@@ -39,8 +39,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Install Yandex Cloud CLI
         run: |
-          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-          echo 'export PATH=$PATH:/home/runner/.yandex-cloud/bin' >> $GITHUB_ENV
+         curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+         echo 'source "/home/runner/.bashrc"' >> $GITHUB_ENV
+         echo 'export PATH=$PATH:$HOME/yandex-cloud/bin' >> $GITHUB_ENV
+
+      - name: Use Yandex Cloud CLI
+        run: |
+         source $GITHUB_ENV
+         yc --version
       - name: Verify Yandex Cloud CLI installation
         run: |
           source $GITHUB_ENV
