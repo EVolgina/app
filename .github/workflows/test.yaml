@@ -45,8 +45,8 @@ jobs:
 
       - name: Use Yandex Cloud CLI
         run: |
-          source $GITHUB_ENV
-          yc version
+          /home/runner/yandex-cloud/bin/
+          yc version 
       - name: Set up kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
