@@ -37,16 +37,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install Yandex Cloud CLI
+     - name: Install Yandex Cloud CLI
         run: |
-         curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-         echo 'source "/home/runner/.bashrc"' >> $GITHUB_ENV
-         echo 'export PATH=$PATH:$HOME/yandex-cloud/bin' >> $GITHUB_ENV
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          echo 'export PATH=$PATH:/home/runner/.yandex-cloud/bin' >> $GITHUB_ENV
+      - name: Verify Yandex Cloud CLI installation
+        run: |
+          source $GITHUB_ENV
+          which yc
+          yc --version
 
       - name: Use Yandex Cloud CLI
         run: |
           /home/runner/yandex-cloud/bin/
-          yc version 
+    
       - name: Set up kubectl
         run: |
           curl -LO "https://dl.k8s.io/release/v1.26.0/bin/linux/amd64/kubectl"
