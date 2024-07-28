@@ -57,19 +57,21 @@ jobs:
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
           kubectl version --client
-      - name: Configure kubectl
+     - name: Configure kubectl
         run: |
-          export PATH=$PATH:/home/runner/.yandex-cloud/bin
+          source $GITHUB_ENV
           echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
           export KUBECONFIG=kubeconfig.yaml
           kubectl config view
           kubectl get pods --all-namespaces
       - name: Deploy to Kubernetes
         run: |
+          source $GITHUB_ENV
           kubectl set image deployment/nginx nginx=${{ secrets.DOCKER_USERNAME }}/app:latest -n default
         continue-on-error: true
       - name: Check deployment status
         run: |
+          source $GITHUB_ENV
           kubectl rollout status deployment/nginx -n default
         continue-on-error: true
     env:
